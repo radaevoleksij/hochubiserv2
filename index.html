@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Калькулятор для розрахунку довжини джгутів</title>
+  <meta name="description" content="Онлайн-калькулятор для розрахунку довжини джгутів. Формули: E=B/5, F=E*A, G=ceil(F/C), H=(F−C)/2, I=H*D, J=D*F, K=J/90, L=J/200. Темна тема, PWA." />
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0b0d10" />
+  <style>
+    :root{
+      --bg:#0b0d10; --panel:#12161b; --text:#e6edf3; --accent:#3ea6ff;
+      --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif}
+    .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
+    .card{background:var(--panel);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-top:16px}
+    input[type=number],input[type=text]{background:#141a22;border:1px solid #2a3440;color:#e6edf3;padding:10px 12px;border-radius:12px;width:100%;outline:none}
+    input[type=number]:focus,input[type=text]:focus{background:#1b232d!important;color:#ffffff!important;border-color:#3ea6ff!important;caret-color:#3ea6ff}
+    input[readonly]{opacity:.9}
+    .row{display:grid;grid-template-columns:210px 1fr 90px;gap:10px;align-items:center;margin:8px 0}
+    button{cursor:pointer;background:#111923;border:1px solid #2a3440;color:#e6edf3;border-radius:12px;padding:10px 14px;font-weight:600}
+    button:hover{border-color:#3a4b61}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🇺🇦 Слава Україні! Калькулятор джгутів</h1>
+  <div class="card">
+    <h2>Вхідні дані (A–D)</h2>
+    <div class="row"><label>A — довжина виробу</label><input id="A" type="number" placeholder="см"><span>см</span></div>
+    <div class="row"><label>B — рядів у 5 см</label><input id="B" type="number" placeholder="рядів"><span>р</span></div>
+    <div class="row"><label>C — бісерин у колі</label><input id="C" type="number" placeholder="шт"><span>шт</span></div>
+    <div class="row"><label>D — бісерин у рапорті</label><input id="D" type="number" placeholder="шт"><span>шт</span></div>
+    <button id="reset">Скинути</button>
+    <button id="save">Зберегти</button>
+    <button id="load">Відновити</button>
+    <button id="copy">Копіювати результати</button>
+  </div>
+  <div class="card">
+    <h2>Результати (E–L)</h2>
+    <div class="row"><label>E = B/5</label><input id="E" readonly><span>ряд/см</span></div>
+    <div class="row"><label>F = E×A</label><input id="F" readonly><span>рядів</span></div>
+    <div class="row"><label>G = ceil(F/C)</label><input id="G" readonly><span>рапортів</span></div>
+    <div class="row"><label>H = (F−C)/2</label><input id="H" readonly><span>рядів</span></div>
+    <div class="row"><label>I = H×D</label><input id="I" readonly><span>шт</span></div>
+    <div class="row"><label>J = D×F</label><input id="J" readonly><span>шт</span></div>
+    <div class="row"><label>K = J/90</label><input id="K" readonly><span>г (Preciosa)</span></div>
+    <div class="row"><label>L = J/200</label><input id="L" readonly><span>г (Delica)</span></div>
+  </div>
+</div>
+<script>
+const $=s=>document.querySelector(s),fmt=(n,f=4)=>Number.isFinite(n)?n.toFixed(f).replace(/\.0+$/,''):'';
+const A=$('#A'),B=$('#B'),C=$('#C'),D=$('#D'),E=$('#E'),F=$('#F'),G=$('#G'),H=$('#H'),I=$('#I'),J=$('#J'),K=$('#K'),L=$('#L');
+function compute(){
+ const a=+A.value,b=+B.value,c=+C.value,d=+D.value;
+ const e=(b/5)||NaN,f=(e*a)||NaN,g=(c?Math.ceil(f/c):NaN),h=((f-c)/2)||NaN,i=(h*d)||NaN,j=(d*f)||NaN,k=(j/90)||NaN,l=(j/200)||NaN;
+ [E,F,G,H,I,J,K,L].forEach((el,i)=>el.value=fmt([e,f,g,h,i,j,k,l][i]));
+}
+[A,B,C,D].forEach(el=>el.addEventListener('input',compute));
+$('#reset').onclick=()=>{A.value=B.value=C.value=D.value='';compute();};
+$('#save').onclick=()=>{localStorage.setItem('beadcalc',JSON.stringify({A:A.value,B:B.value,C:C.value,D:D.value}));alert('Збережено ✅');};
+$('#load').onclick=()=>{try{const d=JSON.parse(localStorage.getItem('beadcalc'));A.value=d.A||'';B.value=d.B||'';C.value=d.C||'';D.value=d.D||'';}catch{}compute();};
+$('#copy').onclick=()=>{navigator.clipboard.writeText('Результати:\n'+[E,F,G,H,I,J,K,L].map(x=>x.value).join('\n'));alert('Скопійовано 📋');};
+document.addEventListener('DOMContentLoaded',()=>{try{const d=JSON.parse(localStorage.getItem('beadcalc'));if(d){A.value=d.A||'';B.value=d.B||'';C.value=d.C||'';D.value=d.D||'';}}catch{}compute();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');});
+</script>
+</body>
+</html>
